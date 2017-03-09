@@ -15,16 +15,21 @@ var main=(function(){
 	}
 	initModule=function(){
 		var lnglat='',
+		circles=[],
 			circle=0,
 			inputGroupCount=0;
 		setDomMap();
 		domMap.$btnRefresh.addEventListener('click',function(){
 			domMap.$input.innerHTML='';
 			inputGroupCount=0;
+			for(var i=0;i<circles.length;i++){
+				circles[i].show();
+			}
 		});
 		domMap.$btnAdd.addEventListener('click',function(){
 			// let html=domMap.$input.innerHTML;
 			++inputGroupCount;
+			domMap.$input.innerHTML='';
 			domMap.$input.innerHTML='<br/>点：<input type="text" value="'+lnglat+'" name="" class="js-dot" data-index="'+inputGroupCount+'"/> 距离（km）：<input type="text" name="" class="js-circle" data-index="'+inputGroupCount+'"/>';
 		});
 		document.addEventListener('change',function(e){
@@ -36,11 +41,15 @@ var main=(function(){
 				        radius: parseFloat(e.target.value)*1000, //半径 米
 				        strokeColor: "#F33", //线颜色
 				        strokeOpacity: 1, //线透明度
-				        strokeWeight: 3, //线粗细度
+				        strokeWeight: 0.1, //线粗细度
 				        fillColor: "#ee2200", //填充颜色
 				        fillOpacity: 0.35//填充透明度
 				    });
 				    circle.setMap(map);
+				    circles.push(circle);
+				    for(var i=0;i<circles.length;i++){
+						circles[i].hide();
+					}
 			}
 		},true)
 		map = new AMap.Map('container',{
