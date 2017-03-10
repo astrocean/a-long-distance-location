@@ -1,4 +1,3 @@
-//service-worker的作用域与service-worker.js存放的位置有关
 var cacheName = 'a-long-distance-location-2';
 var dataCacheName='a-long-distance-location-data';
 var filesToCache = [
@@ -8,16 +7,16 @@ var filesToCache = [
   '/css/styles.css',
   '/images/ic_add_white_24px.svg',
   '/images/ic_refresh_white_24px.svg',
-  '/images/icon.png'
+  '/images/icon.png',
+  '/manifest.json',
+  '/service-worker.js'
 ];
-self.addEventListener('install',function(e){
-  console.log('ServiceWorker Install');
-  e.waitUntil(
-    caches.open(cacheName).then(function(cache){
+caches.open(cacheName).then(function(cache){
       console.log('ServiceWorker Caching app shell');
       return cache.addAll(filesToCache);
-    })
-  );
+});
+self.addEventListener('install',function(e){
+  console.log('ServiceWorker Install');
 });
 //当 service worker 开始启动时，这将会发射activate事件
 self.addEventListener('activate',function(e){
@@ -42,22 +41,50 @@ self.addEventListener('activate',function(e){
    */
   return self.clients.claim();
 });
-
+//service-worker的作用域与service-worker.js存放的位置有关
 self.addEventListener('fetch',function(e){
-  // console.log('ServiceWorker fetch',e);
-   var dataUrl = '-----';
+
+   var dataUrl = 'amap.com';
+   console.log('[Service Worker] Fetch', e.request.url);
   if (e.request.url.indexOf(dataUrl) > -1) {
+    // console.log('2222222222222',e.request.url);
     e.respondWith(
       caches.open(dataCacheName).then(function(cache){
+        // console.log('44444444444444',e.request.url);
         return fetch(e.request).then(function(response){
+             // console.log('3333333333333333',e.request.url,response);
           cache.put(e.request.url,response.clone());
           return response;
-        });
+        }).catch(function(error){
+          caches.match(e.request).then(function(response) {
+              return response||new Response("Response body", {
+                    headers: { "Content-Type" : "text/plain" }
+                  });
+          }).catch(function(aa){
+          })
+        })
     }));
   }else{
     e.respondWith(
       caches.match(e.request).then(function(response){
-        return response || fetch(e.request);
+        console.log('555555555555555',e.request.url,response);
+        if(!response){
+           throw new Error("cache miss");
+        }
+        return response;
+      }).catch(function(){
+          return fetch(e.request).then(function(response) {
+                    return  caches.open(cacheName).then(function(cache) {
+
+                              cache.put(e.request.url,response.clone());
+                            return response;
+                    })
+                }).catch(function(error){
+                  console.log('fetch error====',error);
+                  return new Response("Response body", {
+                    headers: { "Content-Type" : "text/plain" }
+                  });;
+                });
       })
     );
   }

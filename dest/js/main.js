@@ -14,6 +14,8 @@ var main=(function(){
 		}
 	}
 	initModule=function(){
+	
+		
 		var lnglat='',
 		circles=[],
 			circle=0,
@@ -32,6 +34,8 @@ var main=(function(){
 			domMap.$input.innerHTML='';
 			domMap.$input.innerHTML='<br/>点：<input type="text" value="'+lnglat+'" name="" class="js-dot" data-index="'+inputGroupCount+'"/> 距离（km）：<input type="text" name="" class="js-circle" data-index="'+inputGroupCount+'"/>';
 		});
+		if(!AMap){return;}
+
 		document.addEventListener('change',function(e){
 			if(e.target.className=='js-circle'){
 				var index=e.target.getAttribute('data-index'),
@@ -90,13 +94,7 @@ var main=(function(){
 
         domMap.$spinner.setAttribute('hidden', true);
         domMap.$container.removeAttribute('hidden');
-		if('serviceWorker' in navigator){
-			navigator.serviceWorker
-				.register('../service-worker.js')
-				.then(function(){
-					console.log('Service Worker Registered');
-				});
-		}
+
 		let url="aaa";
 		 if ('caches' in window) {
 		 	caches.match(url).then(function(response) {
